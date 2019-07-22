@@ -396,7 +396,7 @@ def remove_cte(part, as_string=False):
     """
     enc = part.get_content_charset() or 'ascii'
     cte = str(part.get('content-transfer-encoding', '7bit')).lower().strip()
-    payload = part.get_payload()
+    payload = part.get_payload(decode=False)
     sp = ''  # string variant of return value
     bp = b''  # bytestring variant
 
@@ -422,7 +422,12 @@ def remove_cte(part, as_string=False):
         # we need to encode that back to bytes so we can decode it using
         # the correct encoding, or it might not, in which case assume that
         # the str representation we got is correct.
-        bp = payload.encode('raw-unicode-escape')
+        # bp = payload.encode('raw-unicode-escape')
+        sp = payload
+        if as_string:
+            return sp
+        bp = payload.encode('utf-8')
+        return bp
 
     elif 'quoted-printable' in cte:
         logging.debug('assuming Content-Transfer-Encoding: quoted-printable')
